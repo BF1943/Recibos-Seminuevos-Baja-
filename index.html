@@ -47,12 +47,12 @@
 <body class="bg-gray-100 is-loading">
 
     <!-- === VISTA DE CARGA INICIAL === -->
-    <div id="app-loader" class="min-h-screen items-center justify-center">
+    <div id="app-loader" class="min-h-screen flex items-center justify-center">
         <div class="loader mx-auto"></div>
     </div>
     
     <!-- === VISTA DE LOGIN CON CORREO Y CONTRASEÑA === -->
-    <div id="login-view" class="min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div id="login-view" class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
                 <svg class="mx-auto h-12 w-auto" viewBox="0 0 400 134" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6795 32.8462C64.6795 24.3168 59.9452 17.5872 52.2982 15.3524C48.831 14.3056 45.4547 14.3056 42.043 15.4851C34.396 17.8425 29.5303 24.662 29.5303 33.1015C29.5303 39.5301 32.942 45.3368 38.0853 47.9495C33.7431 42.5082 32.5511 35.198 35.1812 29.0901C38.0094 22.5912 44.595 18.7264 51.7897 19.3484C58.8529 19.9703 64.6795 25.6669 64.6795 32.8462Z" fill="#D8272F"/><path d="M80.1268 61.4231C82.7569 55.3152 81.5649 47.9151 76.8306 42.5631C72.0963 37.2111 65.0331 35.0312 58.2612 36.6083C51.6208 38.1855 46.3601 43.4357 44.9859 50.0402C43.6117 56.6447 46.2418 63.3193 51.3851 67.239C56.3969 70.9939 63.1963 71.4845 68.8169 68.7302C71.3155 67.4854 73.4901 65.7196 75.1741 63.638C77.9366 60.1812 79.164 65.2535 80.1268 61.4231Z" fill="#D8272F"/><text x="100" y="60" font-family="Inter, sans-serif" font-size="48" font-weight="bold" fill="#333333">SEMINUEVOS</text><text x="100" y="95" font-family="Inter, sans-serif" font-size="36" font-weight="500" fill="#A0A0A0">BAJA</text></svg>
@@ -224,10 +224,10 @@
     </template>
 
     <script type="module">
-        // Importar las funciones necesarias, incluyendo las de email/password
+        // Importar las funciones necesarias, incluyendo las de email/password y 'where' para las consultas
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, collection, getDocs, deleteDoc, enableIndexedDbPersistence, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, collection, getDocs, deleteDoc, enableIndexedDbPersistence, query, where, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Basic App Setup ---
         const appId = 'default-app-id'; // This should ideally be a unique ID for your app
@@ -251,12 +251,137 @@
         function numeroALetras(num) { if (typeof num !== 'number' || isNaN(num)) { return "CANTIDAD NO VÁLIDA"; } const unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"]; const decenas = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"]; const centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"]; const especiales = { 10: "DIEZ", 11: "ONCE", 12: "DOCE", 13: "TRECE", 14: "CATORCE", 15: "QUINCE" }; function convertirMenoresA20(n) { if (n < 10) return unidades[n]; if (n >= 10 && n <= 15) return especiales[n]; return "DIECI" + unidades[n % 10]; } function convertir(n) { if (n < 20) return convertirMenoresA20(n); if (n < 30) return n === 20 ? "VEINTE" : "VEINTI" + unidades[n % 10]; let d = Math.floor(n / 10), u = n % 10; return u === 0 ? decenas[d] : decenas[d] + " Y " + unidades[u]; } function convertirCentenas(n) { if (n < 100) return convertir(n); if (n === 100) return "CIEN"; let c = Math.floor(n / 100), resto = n % 100, res = centenas[c]; if (resto > 0) res += " " + convertir(resto); return res; } function convertirMiles(n) { if (n < 1000) return convertirCentenas(n); let miles = Math.floor(n / 1000), resto = n % 1000, strMiles = (miles === 1 ? "MIL" : convertirCentenas(miles) + " MIL"), strResto = (resto > 0 ? " " + convertirCentenas(resto) : ""); return strMiles + strResto; } function convertirMillones(n) { if (n < 1000000) return convertirMiles(n); let millones = Math.floor(n / 1000000), resto = n % 1000000, strMillones = (millones === 1 ? "UN MILLON" : convertirMiles(millones) + " MILLONES"), strResto = (resto > 0 ? " " + convertirMiles(resto) : ""); return strMillones + strResto; } if (num === 0) return "CERO PESOS 00/100 M.N."; let enteros = Math.floor(num), centavos = Math.round((num - enteros) * 100); if (centavos >= 100) { centavos = 0; enteros++; } let centavosStr = centavos.toString().padStart(2, '0'); let letrasEnteros = convertirMillones(enteros); return `${letrasEnteros} PESOS ${centavosStr}/100 M.N.`; }
         function showStatusMessage(message, duration, isSuccess = false) { const statusMsg = document.getElementById('status-message'); if (statusMsg) { statusMsg.textContent = message; statusMsg.classList.remove('flash-success'); if (isSuccess) { setTimeout(() => statusMsg.classList.add('flash-success'), 10); } if (duration) { setTimeout(() => { if (statusMsg.textContent === message) { statusMsg.textContent = ''; statusMsg.classList.remove('flash-success'); } }, duration); } } }
 
-        // --- CORE APPLICATION LOGIC (FIREBASE, ROLES, RECEIPTS - Sin cambios) ---
+        // --- CORE APPLICATION LOGIC (FIREBASE, ROLES, RECEIPTS) ---
         async function checkAndSetupUserRole(user) { const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid); try { const userDoc = await getDoc(userDocRef); if (userDoc.exists()) { state.userRole = userDoc.data().role; } else { const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users'); const querySnapshot = await getDocs(query(usersRef, limit(1))); const role = querySnapshot.empty ? ROLES.ADMIN : ROLES.COLLABORATOR; await setDoc(userDocRef, { identifier: user.email, role: role, createdAt: new Date().toISOString() }); state.userRole = role; } } catch (e) { console.error("Error setting up user role:", e); state.userRole = ROLES.COLLABORATOR; } }
         function prepareNewReceipt() { setAppView('template-createReceipt', () => { const dateEl = document.getElementById('date'); if (dateEl) { dateEl.value = new Date().toLocaleDateString('en-CA'); } const amountInput = document.getElementById('amount-number'); const amountText = document.getElementById('amount-text'); const debouncedConvert = debounce((value) => { if(amountText) amountText.value = numeroALetras(value || 0).toUpperCase(); }, 300); amountInput?.addEventListener('input', (e) => { const el = e.target; let value = el.value.replace(/[^\d.]/g, ''); const parts = value.split('.'); if (parts.length > 2) { value = parts[0] + '.' + parts.slice(1).join(''); } el.value = value; debouncedConvert(parseFloat(value)); }); document.getElementById('payment-method')?.addEventListener('change', (e) => { const folioContainer = document.getElementById('folio-container'); const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolio); }); document.getElementById('save-print-btn')?.addEventListener('click', saveAndPrint); }); showStatusMessage('Listo para crear un nuevo recibo.'); }
         async function getNextReceiptNumber() { const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'counters', 'receipts'); try { return await runTransaction(db, async (transaction) => { const counterDoc = await transaction.get(counterRef); const nextId = (counterDoc.data()?.lastNumber || 0) + 1; transaction.set(counterRef, { lastNumber: nextId }, { merge: true }); return nextId; }); } catch (e) { console.error("Transaction failed:", e); throw e; } }
         async function saveAndPrint() { if (state.isSaving) return; const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method'); const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0; if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); } state.isSaving = true; const saveBtn = document.getElementById('save-print-btn'); if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Guardando...'; saveBtn.disabled = true; } try { const newReceiptNumber = await getNextReceiptNumber(); const receiptData = { receiptNumber: newReceiptNumber, amount, amountInWords: document.getElementById('amount-text')?.value, recipient: recipientEl.value, concept: conceptEl.value, date: document.getElementById('date')?.value, paymentMethod: paymentMethodEl.value, folio: document.getElementById('folio')?.value || '', createdAt: new Date().toISOString(), createdBy: state.currentUser.uid }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(receiptData.receiptNumber)), receiptData); prepareNewReceipt(); setTimeout(() => { showStatusMessage(`Recibo #${String(newReceiptNumber).padStart(5, '0')} guardado con éxito.`, 4000, true); playSuccessSound(); generatePDF(receiptData); }, 100); } catch (error) { console.error("Error saving receipt:", error); await showModal(`Error al guardar el recibo: ${error.message}`); } finally { state.isSaving = false; if(saveBtn) { saveBtn.innerHTML = 'Guardar y Descargar PDF'; saveBtn.disabled = false; } } }
-        async function fetchAndDisplayReceipts(loadMore = false) { if (!loadMore) { lastVisibleReceipt = null; setAppView('template-listReceipts', () => { document.getElementById('search-receipts-input')?.addEventListener('input', (e) => { const searchTerm = e.target.value.toLowerCase().trim(); document.querySelectorAll('#receipts-list-body tr').forEach(row => { const rowText = row.dataset.searchText || ''; row.style.display = rowText.includes(searchTerm) ? '' : 'none'; }); }); document.getElementById('load-more-btn')?.addEventListener('click', () => fetchAndDisplayReceipts(true)); }); } const listBody = document.getElementById('receipts-list-body'); const loader = document.getElementById('list-loader'); const loadMoreBtn = document.getElementById('load-more-btn'); if (!listBody || !loader || !loadMoreBtn) return; if (!loadMore) { listBody.innerHTML = ''; } loader.style.display = 'block'; loadMoreBtn.disabled = true; try { const receiptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'receipts'); const constraints = [orderBy("receiptNumber", "desc"), limit(15)]; if (lastVisibleReceipt) { constraints.push(startAfter(lastVisibleReceipt)); } const q = query(receiptsRef, ...constraints); const documentSnapshots = await getDocs(q); if (documentSnapshots.empty && !loadMore) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 5; cell.className = 'text-center p-4'; cell.textContent = 'No se encontraron recibos.'; row.appendChild(cell); listBody.appendChild(row); } documentSnapshots.forEach(docSnap => { const data = docSnap.data(); const row = document.createElement('tr'); row.className = 'bg-white border-b'; row.dataset.searchText = `${data.recipient} ${data.concept} ${data.receiptNumber}`.toLowerCase(); const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy); const createCell = (text, className = '') => { const cell = document.createElement('td'); cell.className = `px-6 py-4 ${className}`; cell.textContent = text; return cell; }; row.appendChild(createCell(String(data.receiptNumber).padStart(5, '0'), 'font-medium text-gray-900')); row.appendChild(createCell(data.date)); row.appendChild(createCell(data.recipient)); row.appendChild(createCell(new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.amount))); const actionsCell = document.createElement('td'); actionsCell.className = 'px-6 py-4 text-center'; const viewBtn = document.createElement('button'); viewBtn.textContent = 'Ver'; viewBtn.className = 'load-btn font-medium text-blue-600 hover:underline'; viewBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(viewBtn); if (canEdit) { const editBtn = document.createElement('button'); editBtn.textContent = 'Editar'; editBtn.className = 'edit-btn ml-2 text-yellow-500 hover:text-yellow-700 font-medium'; editBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(editBtn); } if (state.userRole === ROLES.ADMIN) { const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Eliminar'; deleteBtn.className = 'delete-btn ml-2 text-red-500 hover:text-red-700 font-medium'; deleteBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(deleteBtn); } row.appendChild(actionsCell); listBody.appendChild(row); }); lastVisibleReceipt = documentSnapshots.docs[documentSnapshots.docs.length-1]; loadMoreBtn.style.display = documentSnapshots.docs.length < 15 ? 'none' : 'inline-flex'; } catch (error) { console.error("Error fetching receipts:", error); listBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error al cargar.</td></tr>'; } finally { loader.style.display = 'none'; loadMoreBtn.disabled = false; } }
+        
+        async function fetchAndDisplayReceipts(loadMore = false) {
+            if (!loadMore) {
+                lastVisibleReceipt = null;
+                setAppView('template-listReceipts', () => {
+                    document.getElementById('search-receipts-input')?.addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase().trim();
+                        document.querySelectorAll('#receipts-list-body tr').forEach(row => {
+                            const rowText = row.dataset.searchText || '';
+                            row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+                        });
+                    });
+                    document.getElementById('load-more-btn')?.addEventListener('click', () => fetchAndDisplayReceipts(true));
+                });
+            }
+
+            const listBody = document.getElementById('receipts-list-body');
+            const loader = document.getElementById('list-loader');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+
+            if (!listBody || !loader || !loadMoreBtn) return;
+            
+            if (!loadMore) {
+              listBody.innerHTML = ''; 
+            }
+            loader.style.display = 'block';
+            loadMoreBtn.disabled = true;
+
+            try {
+                const receiptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'receipts');
+                
+                // --- LÓGICA DE CONSULTA CORREGIDA ---
+                let constraints = [];
+
+                // Si el usuario NO es admin, filtramos por su ID.
+                if (state.userRole !== ROLES.ADMIN) {
+                    constraints.push(where("createdBy", "==", state.currentUser.uid));
+                }
+
+                // Todos los resultados se ordenan por número de recibo.
+                constraints.push(orderBy("receiptNumber", "desc"));
+                constraints.push(limit(15));
+                
+                if (lastVisibleReceipt) {
+                    constraints.push(startAfter(lastVisibleReceipt));
+                }
+                const q = query(receiptsRef, ...constraints);
+                // --- FIN DE LA LÓGICA CORREGIDA ---
+
+                
+                const documentSnapshots = await getDocs(q);
+                
+                if (documentSnapshots.empty && !loadMore) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 5;
+                    cell.className = 'text-center p-4';
+                    cell.textContent = 'No se encontraron recibos.';
+                    row.appendChild(cell);
+                    listBody.appendChild(row);
+                }
+                
+                documentSnapshots.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b';
+                    row.dataset.searchText = `${data.recipient} ${data.concept} ${data.receiptNumber}`.toLowerCase();
+
+                    const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy);
+                    
+                    const createCell = (text, className = '') => {
+                        const cell = document.createElement('td');
+                        cell.className = `px-6 py-4 ${className}`;
+                        cell.textContent = text;
+                        return cell;
+                    };
+
+                    row.appendChild(createCell(String(data.receiptNumber).padStart(5, '0'), 'font-medium text-gray-900'));
+                    row.appendChild(createCell(data.date));
+                    row.appendChild(createCell(data.recipient));
+                    row.appendChild(createCell(new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.amount)));
+
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'px-6 py-4 text-center';
+                    
+                    const viewBtn = document.createElement('button');
+                    viewBtn.textContent = 'Ver';
+                    viewBtn.className = 'load-btn font-medium text-blue-600 hover:underline';
+                    viewBtn.dataset.id = data.receiptNumber;
+                    actionsCell.appendChild(viewBtn);
+
+                    if (canEdit) {
+                        const editBtn = document.createElement('button');
+                        editBtn.textContent = 'Editar';
+                        editBtn.className = 'edit-btn ml-2 text-yellow-500 hover:text-yellow-700 font-medium';
+                        editBtn.dataset.id = data.receiptNumber;
+                        actionsCell.appendChild(editBtn);
+                    }
+                    if (state.userRole === ROLES.ADMIN) {
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'Eliminar';
+                        deleteBtn.className = 'delete-btn ml-2 text-red-500 hover:text-red-700 font-medium';
+                        deleteBtn.dataset.id = data.receiptNumber;
+                        actionsCell.appendChild(deleteBtn);
+                    }
+                    row.appendChild(actionsCell);
+                    listBody.appendChild(row);
+                });
+
+                lastVisibleReceipt = documentSnapshots.docs[documentSnapshots.docs.length-1];
+                loadMoreBtn.style.display = documentSnapshots.docs.length < 15 ? 'none' : 'inline-flex';
+                
+            } catch (error) {
+                console.error("Error fetching receipts:", error);
+                // Si el error es por un índice faltante, muestra un mensaje más útil.
+                if (error.code === 'failed-precondition') {
+                     listBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error: Se requiere una configuración adicional en la base de datos. Por favor, abra la consola de desarrollador (F12), busque el error de Firestore y haga clic en el enlace para crear el índice necesario.</td></tr>';
+                } else {
+                    listBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error al cargar.</td></tr>';
+                }
+            } finally {
+                loader.style.display = 'none';
+                loadMoreBtn.disabled = false;
+            }
+        }
+        
         async function deleteReceipt(id) { if (state.userRole !== ROLES.ADMIN) { return showModal('No tiene permisos para realizar esta acción.'); } if(await showModal(`¿Eliminar el recibo #${String(id).padStart(5, '0')}? Esta acción no se puede deshacer.`, { isConfirm: true, confirmText: 'Sí, eliminar' })) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id))); await showModal('Recibo eliminado.'); fetchAndDisplayReceipts(false); } catch (error) { console.error("Error deleting receipt:", error); await showModal(`No se pudo eliminar: ${error.message}`);} } }
         async function loadReceiptForEditing(id) { setAppView('template-createReceipt', async () => { try { const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id))); if (docSnap.exists()) { const data = docSnap.data(); const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy); if (!canEdit) { return showModal('No tiene permisos para editar este recibo.').then(() => fetchAndDisplayReceipts()); } showStatusMessage(`Editando recibo #${String(id).padStart(5, '0')}...`); document.getElementById('receipt-number').textContent = String(data.receiptNumber).padStart(5, '0'); const amountNumEl = document.getElementById('amount-number'); if (amountNumEl) amountNumEl.value = data.amount; const amountTextEl = document.getElementById('amount-text'); if (amountTextEl) amountTextEl.value = data.amountInWords; document.getElementById('recipient').value = data.recipient; document.getElementById('concept').value = data.concept; document.getElementById('date').value = data.date; const paymentMethodEl = document.getElementById('payment-method'); paymentMethodEl.value = data.paymentMethod; const folioContainer = document.getElementById('folio-container'); const showFolioOnLoad = paymentMethodEl.value === 'Transferencia' || paymentMethodEl.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolioOnLoad); if (showFolioOnLoad) { document.getElementById('folio').value = data.folio; } const debouncedConvert = debounce((value) => { if(amountTextEl) amountTextEl.value = numeroALetras(value || 0).toUpperCase(); }, 300); amountNumEl?.addEventListener('input', (e) => { let value = e.target.value.replace(/[^\d.]/g, ''); const parts = value.split('.'); if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join(''); e.target.value = value; debouncedConvert(parseFloat(value)); }); paymentMethodEl?.addEventListener('change', (e) => { const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolio); }); const saveBtn = document.getElementById('save-print-btn'); saveBtn.textContent = "Guardar Cambios"; saveBtn.className = 'no-print mt-6 w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-yellow-600 flex items-center justify-center'; saveBtn.onclick = () => updateReceipt(data.receiptNumber); } else { showStatusMessage("No se encontró el recibo."); setTimeout(fetchAndDisplayReceipts, 1500); } } catch(e) { console.error("Error loading receipt for edit:", e); showStatusMessage("Error al cargar el recibo."); } }); }
         async function updateReceipt(id) { if (state.isSaving) return; const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method'); const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0; if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); } state.isSaving = true; const saveBtn = document.getElementById('save-print-btn'); if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Actualizando...'; saveBtn.disabled = true; } try { const receiptRef = doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id)); const updatedData = { amount, amountInWords: document.getElementById('amount-text')?.value, recipient: recipientEl.value, concept: conceptEl.value, date: document.getElementById('date')?.value, paymentMethod: paymentMethodEl.value, folio: document.getElementById('folio')?.value || '', }; await updateDoc(receiptRef, updatedData); showStatusMessage(`Recibo #${String(id).padStart(5, '0')} actualizado.`, 4000, true); playSuccessSound(); fetchAndDisplayReceipts(false); } catch(error) { console.error("Error updating receipt:", error); await showModal(`Error al actualizar el recibo: ${error.message}`); } finally { state.isSaving = false; } }
