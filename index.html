@@ -23,8 +23,9 @@
         .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid var(--brand-red); width: 1.25rem; height: 1.25rem; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #login-view, #app-view { display: none; }
-        body.is-loading #login-view, body.is-logged-out #login-view { display: flex; }
+        #login-view, #app-view, #app-loader { display: none; }
+        body.is-loading #app-loader { display: flex; }
+        body.is-logged-out #login-view { display: flex; }
         body.is-authenticated #app-view { display: block; }
         
         .no-print { display: block; }
@@ -43,17 +44,42 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 is-loading">
 
-    <!-- === VISTA DE LOGIN === -->
+    <!-- === VISTA DE CARGA INICIAL === -->
+    <div id="app-loader" class="min-h-screen items-center justify-center">
+        <div class="loader mx-auto"></div>
+    </div>
+    
+    <!-- === VISTA DE LOGIN CON CORREO Y CONTRASEÑA === -->
     <div id="login-view" class="min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
-                 <svg class="mx-auto h-12 w-auto" viewBox="0 0 400 134" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6795 32.8462C64.6795 24.3168 59.9452 17.5872 52.2982 15.3524C48.831 14.3056 45.4547 14.3056 42.043 15.4851C34.396 17.8425 29.5303 24.662 29.5303 33.1015C29.5303 39.5301 32.942 45.3368 38.0853 47.9495C33.7431 42.5082 32.5511 35.198 35.1812 29.0901C38.0094 22.5912 44.595 18.7264 51.7897 19.3484C58.8529 19.9703 64.6795 25.6669 64.6795 32.8462Z" fill="#D8272F"/><path d="M80.1268 61.4231C82.7569 55.3152 81.5649 47.9151 76.8306 42.5631C72.0963 37.2111 65.0331 35.0312 58.2612 36.6083C51.6208 38.1855 46.3601 43.4357 44.9859 50.0402C43.6117 56.6447 46.2418 63.3193 51.3851 67.239C56.3969 70.9939 63.1963 71.4845 68.8169 68.7302C71.3155 67.4854 73.4901 65.7196 75.1741 63.638C77.9366 60.1812 79.164 65.2535 80.1268 61.4231Z" fill="#D8272F"/><text x="100" y="60" font-family="Inter, sans-serif" font-size="48" font-weight="bold" fill="#333333">SEMINUEVOS</text><text x="100" y="95" font-family="Inter, sans-serif" font-size="36" font-weight="500" fill="#A0A0A0">BAJA</text></svg>
-                <h2 id="login-message" class="mt-6 text-center text-3xl font-extrabold text-gray-900">Iniciando sesión...</h2>
-                <div id="login-loader" class="loader mx-auto mt-4"></div>
-                <button id="relogin-btn" class="hidden mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Iniciar Sesión de Nuevo</button>
+                <svg class="mx-auto h-12 w-auto" viewBox="0 0 400 134" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M64.6795 32.8462C64.6795 24.3168 59.9452 17.5872 52.2982 15.3524C48.831 14.3056 45.4547 14.3056 42.043 15.4851C34.396 17.8425 29.5303 24.662 29.5303 33.1015C29.5303 39.5301 32.942 45.3368 38.0853 47.9495C33.7431 42.5082 32.5511 35.198 35.1812 29.0901C38.0094 22.5912 44.595 18.7264 51.7897 19.3484C58.8529 19.9703 64.6795 25.6669 64.6795 32.8462Z" fill="#D8272F"/><path d="M80.1268 61.4231C82.7569 55.3152 81.5649 47.9151 76.8306 42.5631C72.0963 37.2111 65.0331 35.0312 58.2612 36.6083C51.6208 38.1855 46.3601 43.4357 44.9859 50.0402C43.6117 56.6447 46.2418 63.3193 51.3851 67.239C56.3969 70.9939 63.1963 71.4845 68.8169 68.7302C71.3155 67.4854 73.4901 65.7196 75.1741 63.638C77.9366 60.1812 79.164 65.2535 80.1268 61.4231Z" fill="#D8272F"/><text x="100" y="60" font-family="Inter, sans-serif" font-size="48" font-weight="bold" fill="#333333">SEMINUEVOS</text><text x="100" y="95" font-family="Inter, sans-serif" font-size="36" font-weight="500" fill="#A0A0A0">BAJA</text></svg>
+                <h2 class="mt-6 text-center text-2xl font-extrabold text-gray-900">Iniciar sesión en tu cuenta</h2>
             </div>
+            <form id="login-form" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="login-email" class="sr-only">Correo electrónico</label>
+                        <input id="login-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="Correo electrónico">
+                    </div>
+                    <div>
+                        <label for="login-password" class="sr-only">Contraseña</label>
+                        <input id="login-password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="Contraseña">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" id="login-btn" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Iniciar Sesión
+                    </button>
+                </div>
+                 <div class="text-sm text-center">
+                    <button type="button" id="register-btn" class="font-medium text-red-600 hover:text-red-500">
+                        ¿No tienes cuenta? Regístrate aquí
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
     
@@ -92,7 +118,7 @@
         </div>
     </div>
 
-    <!-- === PLANTILLAS HTML === -->
+    <!-- === PLANTILLAS HTML (Sin cambios) === -->
     <template id="template-createReceipt">
         <div id="create-receipt-view" class="max-w-4xl mx-auto">
             <div class="receipt-container bg-white p-6 border border-gray-300 shadow-lg rounded-lg text-gray-800">
@@ -198,645 +224,92 @@
     </template>
 
     <script type="module">
+        // Importar las funciones necesarias, incluyendo las de email/password
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, collection, getDocs, deleteDoc, enableIndexedDbPersistence, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Basic App Setup ---
-        // The 'firebaseConfig' object is expected to be injected globally by the hosting environment (e.g., Netlify Snippet Injection).
-        const appId = 'default-app-id';
-
+        const appId = 'default-app-id'; // This should ideally be a unique ID for your app
         let db, auth;
         let appContentWrapper;
         let audioCtx; 
         let lastVisibleReceipt = null;
-
         const state = { currentUser: null, userRole: null, isSaving: false };
         const ROLES = { ADMIN: 'admin', COLLABORATOR: 'collaborator' };
         
-        // --- UTILITY FUNCTIONS ---
-        
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), delay);
-            };
-        }
+        // --- UTILITY FUNCTIONS (Sin cambios) ---
+        function debounce(func, delay) { let timeout; return function(...args) { const context = this; clearTimeout(timeout); timeout = setTimeout(() => func.apply(context, args), delay); }; }
+        function escapeHTML(str) { if (typeof str !== 'string') return ''; return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
 
-        function escapeHTML(str) {
-            if (typeof str !== 'string') return '';
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                "'": '&#39;',
-                '"': '&quot;'
-            }[tag]));
-        }
+        // --- UI & INTERACTION FUNCTIONS (Sin cambios excepto showModal y playSuccessSound) ---
+        function setAppView(templateId, callback) { const template = document.getElementById(templateId); if (!template || !appContentWrapper) return; appContentWrapper.innerHTML = ''; appContentWrapper.appendChild(template.content.cloneNode(true)); if(callback) callback(); }
+        function showModal(message, options = {}) { return new Promise((resolve) => { const { isConfirm = false, confirmText = 'OK', cancelText = 'Cancelar' } = options; const backdrop = document.getElementById('modal-backdrop'); const messageEl = document.getElementById('modal-message'); const actionsEl = document.getElementById('modal-actions'); if (!backdrop || !messageEl || !actionsEl) return resolve(false); messageEl.textContent = message; actionsEl.innerHTML = ''; if (isConfirm) { const confirmBtn = document.createElement('button'); confirmBtn.textContent = confirmText; confirmBtn.className = 'bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-700'; confirmBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(true); }; const cancelBtn = document.createElement('button'); cancelBtn.textContent = cancelText; cancelBtn.className = 'bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-400'; cancelBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(false); }; actionsEl.appendChild(cancelBtn); actionsEl.appendChild(confirmBtn); } else { const okBtn = document.createElement('button'); okBtn.textContent = confirmText; okBtn.className = 'bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700'; okBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(true); }; actionsEl.appendChild(okBtn); } backdrop.classList.remove('hidden'); }); }
+        function initializeAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) { console.error("Web Audio API is not supported in this browser"); } } }
+        function playSuccessSound() { if (!audioCtx) return; if (audioCtx.state === 'suspended') { audioCtx.resume(); } const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination); oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5); oscillator.start(audioCtx.currentTime); oscillator.stop(audioCtx.currentTime + 0.5); }
+        function generatePDF(receiptData) { const styles = ` .receipt-instance { height: 4.8in; box-sizing: border-box; page-break-inside: avoid; overflow: hidden; } .print-receipt-container { border: 1px solid #ccc; padding: 24px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; } .print-divider { border: none; border-top: 2px dashed #ccc; margin: 0.15in 0; } .print-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; } .print-company-name { font-size: 1.2rem; font-weight: bold; margin: 0; } .print-company-details { font-size: 0.8rem; color: #666; margin: 2px 0; } .print-receipt-title { font-size: 0.8rem; font-weight: bold; } .print-folio-label { font-size: 0.7rem; color: #666; margin-top: 0.5rem; } .print-folio-number { font-size: 1.5rem; font-weight: bold; color: #D8272F; } .print-body { display: flex; gap: 1.5rem; } .print-field-group { flex-grow: 1; } .print-field { margin-bottom: 1rem; } .print-field.full-width { width: 100%; } .print-field label { font-size: 0.8rem; font-weight: 600; color: #555; display: block; margin-bottom: 2px;} .print-field p { font-size: 1rem; margin: 0.1rem 0 0 0; padding-bottom: 0.25rem; border-bottom: 1px solid #eee; min-height: 1.2em; } .print-amount-box { text-align: center; background: #f9f9f9; padding: 1rem; border-radius: 8px; width: 180px; } .print-amount-box label { font-size: 0.8rem; text-transform: uppercase; } .print-amount-value { font-size: 1.8rem; font-weight: bold; margin-top: 0.25rem; } .print-footer { display: flex; gap: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem; margin-top: auto; } `; const createReceiptHTML = (title) => ` <div class="print-receipt-container"> <div class="print-header"> <div> <h2 class="print-company-name">SEMINUEVOS BAJA</h2> <p class="print-company-details">RFC: LACI7507176E6</p> <p class="print-company-details">Delante 200, Costa Azul CP22890</p> <p class="print-company-details">Teléfono: 6469778808</p> </div> <div style="text-align: right;"> <p class="print-receipt-title">${escapeHTML(title)}</p> <p class="print-folio-label">FOLIO</p> <p class="print-folio-number">${String(receiptData.receiptNumber).padStart(5, '0')}</p> </div> </div> <div class="print-body"> <div class="print-field-group"> <div class="print-field"> <label>RECIBIDO DE:</label> <p>${escapeHTML(receiptData.recipient)}</p> </div> <div class="print-field"> <label>POR CONCEPTO DE:</label> <p>${escapeHTML(receiptData.concept)}</p> </div> </div> <div class="print-amount-box"> <label>IMPORTE</label> <p class="print-amount-value">$${new Intl.NumberFormat('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(receiptData.amount)}</p> </div> </div> <div class="print-field full-width"> <label>CANTIDAD EN LETRA:</label> <p>${escapeHTML(receiptData.amountInWords)}</p> </div> <div class="print-footer"> <div class="print-field"> <label>FECHA:</label> <p>${escapeHTML(receiptData.date)}</p> </div> <div class="print-field"> <label>MÉTODO DE PAGO:</label> <p>${escapeHTML(receiptData.paymentMethod)}</p> </div> ${receiptData.folio ? `<div class="print-field"><label>FOLIO/REFERENCIA:</label><p>${escapeHTML(receiptData.folio)}</p></div>` : ''} </div> </div> `; const customerCopy = createReceiptHTML('RECIBO DE ENGANCHE - COPIA CLIENTE'); const archiveCopy = createReceiptHTML('RECIBO DE ENGANCHE - COPIA ARCHIVO'); const finalPrintHTML = ` <div style="font-family: 'Inter', sans-serif;"> <style>${styles}</style> <div class="receipt-instance">${customerCopy}</div> <hr class="print-divider"> <div class="receipt-instance">${archiveCopy}</div> </div> `; const element = document.createElement('div'); element.innerHTML = finalPrintHTML; const opt = { margin: 0.4, filename: `Recibo_${String(receiptData.receiptNumber).padStart(5, '0')}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }; html2pdf().from(element).set(opt).save(); }
+        function numeroALetras(num) { if (typeof num !== 'number' || isNaN(num)) { return "CANTIDAD NO VÁLIDA"; } const unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"]; const decenas = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"]; const centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"]; const especiales = { 10: "DIEZ", 11: "ONCE", 12: "DOCE", 13: "TRECE", 14: "CATORCE", 15: "QUINCE" }; function convertirMenoresA20(n) { if (n < 10) return unidades[n]; if (n >= 10 && n <= 15) return especiales[n]; return "DIECI" + unidades[n % 10]; } function convertir(n) { if (n < 20) return convertirMenoresA20(n); if (n < 30) return n === 20 ? "VEINTE" : "VEINTI" + unidades[n % 10]; let d = Math.floor(n / 10), u = n % 10; return u === 0 ? decenas[d] : decenas[d] + " Y " + unidades[u]; } function convertirCentenas(n) { if (n < 100) return convertir(n); if (n === 100) return "CIEN"; let c = Math.floor(n / 100), resto = n % 100, res = centenas[c]; if (resto > 0) res += " " + convertir(resto); return res; } function convertirMiles(n) { if (n < 1000) return convertirCentenas(n); let miles = Math.floor(n / 1000), resto = n % 1000, strMiles = (miles === 1 ? "MIL" : convertirCentenas(miles) + " MIL"), strResto = (resto > 0 ? " " + convertirCentenas(resto) : ""); return strMiles + strResto; } function convertirMillones(n) { if (n < 1000000) return convertirMiles(n); let millones = Math.floor(n / 1000000), resto = n % 1000000, strMillones = (millones === 1 ? "UN MILLON" : convertirMiles(millones) + " MILLONES"), strResto = (resto > 0 ? " " + convertirMiles(resto) : ""); return strMillones + strResto; } if (num === 0) return "CERO PESOS 00/100 M.N."; let enteros = Math.floor(num), centavos = Math.round((num - enteros) * 100); if (centavos >= 100) { centavos = 0; enteros++; } let centavosStr = centavos.toString().padStart(2, '0'); let letrasEnteros = convertirMillones(enteros); return `${letrasEnteros} PESOS ${centavosStr}/100 M.N.`; }
+        function showStatusMessage(message, duration, isSuccess = false) { const statusMsg = document.getElementById('status-message'); if (statusMsg) { statusMsg.textContent = message; statusMsg.classList.remove('flash-success'); if (isSuccess) { setTimeout(() => statusMsg.classList.add('flash-success'), 10); } if (duration) { setTimeout(() => { if (statusMsg.textContent === message) { statusMsg.textContent = ''; statusMsg.classList.remove('flash-success'); } }, duration); } } }
 
-        // --- UI & INTERACTION FUNCTIONS ---
-
-        function setAppView(templateId, callback) {
-            const template = document.getElementById(templateId);
-            if (!template || !appContentWrapper) return;
-            appContentWrapper.innerHTML = ''; 
-            appContentWrapper.appendChild(template.content.cloneNode(true));
-            if(callback) callback();
-        }
-        
-        function showModal(message, options = {}) {
-            return new Promise((resolve) => {
-                const { isConfirm = false, confirmText = 'OK', cancelText = 'Cancelar' } = options;
-                const backdrop = document.getElementById('modal-backdrop');
-                const messageEl = document.getElementById('modal-message');
-                const actionsEl = document.getElementById('modal-actions');
-                if (!backdrop || !messageEl || !actionsEl) return resolve(false);
-                
-                messageEl.textContent = message;
-                actionsEl.innerHTML = ''; 
-
-                if (isConfirm) {
-                    const confirmBtn = document.createElement('button');
-                    confirmBtn.textContent = confirmText;
-                    confirmBtn.className = 'bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-700';
-                    confirmBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(true); };
-                    const cancelBtn = document.createElement('button');
-                    cancelBtn.textContent = cancelText;
-                    cancelBtn.className = 'bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-400';
-                    cancelBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(false); };
-                    actionsEl.appendChild(cancelBtn);
-                    actionsEl.appendChild(confirmBtn);
-                } else {
-                    const okBtn = document.createElement('button');
-                    okBtn.textContent = confirmText;
-                    okBtn.className = 'bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700';
-                    okBtn.onclick = () => { backdrop.classList.add('hidden'); resolve(true); };
-                    actionsEl.appendChild(okBtn);
-                }
-                backdrop.classList.remove('hidden');
-            });
-        }
-        
-        function initializeAudio() {
-            if (!audioCtx) {
-                try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
-                    }
-                } catch(e) {
-                    console.error("Web Audio API is not supported in this browser");
-                }
-            }
-        }
-        
-        function playSuccessSound() {
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.5);
-        }
-
-        function generatePDF(receiptData) {
-            const styles = `
-                .receipt-instance { height: 4.8in; box-sizing: border-box; page-break-inside: avoid; overflow: hidden; }
-                .print-receipt-container { border: 1px solid #ccc; padding: 24px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
-                .print-divider { border: none; border-top: 2px dashed #ccc; margin: 0.15in 0; }
-                .print-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
-                .print-company-name { font-size: 1.2rem; font-weight: bold; margin: 0; }
-                .print-company-details { font-size: 0.8rem; color: #666; margin: 2px 0; }
-                .print-receipt-title { font-size: 0.8rem; font-weight: bold; }
-                .print-folio-label { font-size: 0.7rem; color: #666; margin-top: 0.5rem; }
-                .print-folio-number { font-size: 1.5rem; font-weight: bold; color: #D8272F; }
-                .print-body { display: flex; gap: 1.5rem; }
-                .print-field-group { flex-grow: 1; }
-                .print-field { margin-bottom: 1rem; }
-                .print-field.full-width { width: 100%; }
-                .print-field label { font-size: 0.8rem; font-weight: 600; color: #555; display: block; margin-bottom: 2px;}
-                .print-field p { font-size: 1rem; margin: 0.1rem 0 0 0; padding-bottom: 0.25rem; border-bottom: 1px solid #eee; min-height: 1.2em; }
-                .print-amount-box { text-align: center; background: #f9f9f9; padding: 1rem; border-radius: 8px; width: 180px; }
-                .print-amount-box label { font-size: 0.8rem; text-transform: uppercase; }
-                .print-amount-value { font-size: 1.8rem; font-weight: bold; margin-top: 0.25rem; }
-                .print-footer { display: flex; gap: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem; margin-top: auto; }
-            `;
-            
-            const createReceiptHTML = (title) => `
-                 <div class="print-receipt-container">
-                     <div class="print-header">
-                         <div>
-                             <h2 class="print-company-name">SEMINUEVOS BAJA</h2>
-                             <p class="print-company-details">RFC: LACI7507176E6</p>
-                             <p class="print-company-details">Delante 200, Costa Azul CP22890</p>
-                             <p class="print-company-details">Teléfono: 6469778808</p>
-                         </div>
-                         <div style="text-align: right;">
-                             <p class="print-receipt-title">${escapeHTML(title)}</p>
-                             <p class="print-folio-label">FOLIO</p>
-                             <p class="print-folio-number">${String(receiptData.receiptNumber).padStart(5, '0')}</p>
-                         </div>
-                     </div>
-                     <div class="print-body">
-                         <div class="print-field-group">
-                             <div class="print-field">
-                                 <label>RECIBIDO DE:</label>
-                                 <p>${escapeHTML(receiptData.recipient)}</p>
-                             </div>
-                             <div class="print-field">
-                                 <label>POR CONCEPTO DE:</label>
-                                 <p>${escapeHTML(receiptData.concept)}</p>
-                             </div>
-                         </div>
-                         <div class="print-amount-box">
-                             <label>IMPORTE</label>
-                             <p class="print-amount-value">$${new Intl.NumberFormat('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(receiptData.amount)}</p>
-                         </div>
-                     </div>
-                     <div class="print-field full-width">
-                         <label>CANTIDAD EN LETRA:</label>
-                         <p>${escapeHTML(receiptData.amountInWords)}</p>
-                     </div>
-                     <div class="print-footer">
-                         <div class="print-field">
-                             <label>FECHA:</label>
-                             <p>${escapeHTML(receiptData.date)}</p>
-                         </div>
-                         <div class="print-field">
-                             <label>MÉTODO DE PAGO:</label>
-                             <p>${escapeHTML(receiptData.paymentMethod)}</p>
-                         </div>
-                         ${receiptData.folio ? `<div class="print-field"><label>FOLIO/REFERENCIA:</label><p>${escapeHTML(receiptData.folio)}</p></div>` : ''}
-                     </div>
-                 </div>
-             `;
-
-            const customerCopy = createReceiptHTML('RECIBO DE ENGANCHE - COPIA CLIENTE');
-            const archiveCopy = createReceiptHTML('RECIBO DE ENGANCHE - COPIA ARCHIVO');
-            
-            const finalPrintHTML = `
-                <div style="font-family: 'Inter', sans-serif;">
-                    <style>${styles}</style>
-                    <div class="receipt-instance">${customerCopy}</div>
-                    <hr class="print-divider">
-                    <div class="receipt-instance">${archiveCopy}</div>
-                </div>
-            `;
-            
-            const element = document.createElement('div');
-            element.innerHTML = finalPrintHTML;
-
-            const opt = {
-                margin:       0.4,
-                filename:     `Recibo_${String(receiptData.receiptNumber).padStart(5, '0')}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).save();
-        }
-        
-        function numeroALetras(num) {
-            if (typeof num !== 'number' || isNaN(num)) {
-                return "CANTIDAD NO VÁLIDA";
-            }
-            const unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
-            const decenas = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
-            const centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
-            const especiales = { 10: "DIEZ", 11: "ONCE", 12: "DOCE", 13: "TRECE", 14: "CATORCE", 15: "QUINCE" };
-            function convertirMenoresA20(n) { if (n < 10) return unidades[n]; if (n >= 10 && n <= 15) return especiales[n]; return "DIECI" + unidades[n % 10]; }
-            function convertir(n) { if (n < 20) return convertirMenoresA20(n); if (n < 30) return n === 20 ? "VEINTE" : "VEINTI" + unidades[n % 10]; let d = Math.floor(n / 10), u = n % 10; return u === 0 ? decenas[d] : decenas[d] + " Y " + unidades[u]; }
-            function convertirCentenas(n) { if (n < 100) return convertir(n); if (n === 100) return "CIEN"; let c = Math.floor(n / 100), resto = n % 100, res = centenas[c]; if (resto > 0) res += " " + convertir(resto); return res; }
-            function convertirMiles(n) { if (n < 1000) return convertirCentenas(n); let miles = Math.floor(n / 1000), resto = n % 1000, strMiles = (miles === 1 ? "MIL" : convertirCentenas(miles) + " MIL"), strResto = (resto > 0 ? " " + convertirCentenas(resto) : ""); return strMiles + strResto; }
-            function convertirMillones(n) { if (n < 1000000) return convertirMiles(n); let millones = Math.floor(n / 1000000), resto = n % 1000000, strMillones = (millones === 1 ? "UN MILLON" : convertirMiles(millones) + " MILLONES"), strResto = (resto > 0 ? " " + convertirMiles(resto) : ""); return strMillones + strResto; }
-            if (num === 0) return "CERO PESOS 00/100 M.N.";
-            let enteros = Math.floor(num), centavos = Math.round((num - enteros) * 100);
-            if (centavos >= 100) { centavos = 0; enteros++; }
-            let centavosStr = centavos.toString().padStart(2, '0');
-            let letrasEnteros = convertirMillones(enteros);
-            return `${letrasEnteros} PESOS ${centavosStr}/100 M.N.`;
-        }
-
-        function showStatusMessage(message, duration, isSuccess = false) {
-            const statusMsg = document.getElementById('status-message');
-            if (statusMsg) {
-                statusMsg.textContent = message;
-                statusMsg.classList.remove('flash-success'); 
-                if (isSuccess) {
-                    setTimeout(() => statusMsg.classList.add('flash-success'), 10);
-                }
-                if (duration) {
-                    setTimeout(() => {
-                        if (statusMsg.textContent === message) {
-                            statusMsg.textContent = '';
-                            statusMsg.classList.remove('flash-success');
-                        }
-                    }, duration);
-                }
-            }
-        }
-
-        // --- CORE APPLICATION LOGIC (FIREBASE, ROLES, RECEIPTS) ---
-        async function checkAndSetupUserRole(user) {
-            const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
-            try {
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    state.userRole = userDoc.data().role;
-                } else {
-                    const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-                    const querySnapshot = await getDocs(query(usersRef, limit(1)));
-                    const role = querySnapshot.empty ? ROLES.ADMIN : ROLES.COLLABORATOR;
-                    
-                    await setDoc(userDocRef, { 
-                        identifier: user.isAnonymous ? `anon_${user.uid.substring(0,8)}` : user.email, 
-                        role: role, 
-                        createdAt: new Date().toISOString() 
-                    });
-                    state.userRole = role;
-                }
-            } catch (e) { 
-                console.error("Error setting up user role:", e); 
-                state.userRole = ROLES.COLLABORATOR;
-            }
-        }
-
-        function prepareNewReceipt() {
-            setAppView('template-createReceipt', () => {
-                const dateEl = document.getElementById('date');
-                if (dateEl) {
-                    dateEl.value = new Date().toLocaleDateString('en-CA');
-                }
-
-                const amountInput = document.getElementById('amount-number');
-                const amountText = document.getElementById('amount-text');
-
-                const debouncedConvert = debounce((value) => {
-                    if(amountText) amountText.value = numeroALetras(value || 0).toUpperCase();
-                }, 300);
-
-                amountInput?.addEventListener('input', (e) => {
-                    const el = e.target;
-                    let value = el.value.replace(/[^\d.]/g, '');
-                    const parts = value.split('.');
-                    if (parts.length > 2) {
-                        value = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    el.value = value;
-                    debouncedConvert(parseFloat(value));
-                });
-
-                document.getElementById('payment-method')?.addEventListener('change', (e) => {
-                    const folioContainer = document.getElementById('folio-container');
-                    const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)';
-                    folioContainer?.classList.toggle('hidden', !showFolio);
-                });
-                document.getElementById('save-print-btn')?.addEventListener('click', saveAndPrint);
-            });
-            showStatusMessage('Listo para crear un nuevo recibo.');
-        }
-
-        async function getNextReceiptNumber() {
-            const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'counters', 'receipts');
-            try {
-                return await runTransaction(db, async (transaction) => {
-                    const counterDoc = await transaction.get(counterRef);
-                    const nextId = (counterDoc.data()?.lastNumber || 0) + 1;
-                    transaction.set(counterRef, { lastNumber: nextId }, { merge: true });
-                    return nextId;
-                });
-            } catch (e) { console.error("Transaction failed:", e); throw e; }
-        }
-        
-        async function saveAndPrint() {
-            if (state.isSaving) return;
-            const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method');
-            const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0;
-            if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); }
-            state.isSaving = true;
-            const saveBtn = document.getElementById('save-print-btn');
-            if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Guardando...'; saveBtn.disabled = true; }
-            try {
-                const newReceiptNumber = await getNextReceiptNumber();
-                const receiptData = { receiptNumber: newReceiptNumber, amount, amountInWords: document.getElementById('amount-text')?.value, recipient: recipientEl.value, concept: conceptEl.value, date: document.getElementById('date')?.value, paymentMethod: paymentMethodEl.value, folio: document.getElementById('folio')?.value || '', createdAt: new Date().toISOString(), createdBy: state.currentUser.uid };
-                
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(receiptData.receiptNumber)), receiptData);
-                
-                prepareNewReceipt();
-                
-                setTimeout(() => {
-                    showStatusMessage(`Recibo #${String(newReceiptNumber).padStart(5, '0')} guardado con éxito.`, 4000, true);
-                    playSuccessSound();
-                    generatePDF(receiptData); 
-                }, 100);
-
-            } catch (error) { console.error("Error saving receipt:", error); await showModal(`Error al guardar el recibo: ${error.message}`);
-            } finally { state.isSaving = false; if(saveBtn) { saveBtn.innerHTML = 'Guardar y Descargar PDF'; saveBtn.disabled = false; } }
-        }
-
-        async function fetchAndDisplayReceipts(loadMore = false) {
-            if (!loadMore) {
-                lastVisibleReceipt = null;
-                setAppView('template-listReceipts', () => {
-                    document.getElementById('search-receipts-input')?.addEventListener('input', (e) => {
-                        const searchTerm = e.target.value.toLowerCase().trim();
-                        document.querySelectorAll('#receipts-list-body tr').forEach(row => {
-                            const rowText = row.dataset.searchText || '';
-                            row.style.display = rowText.includes(searchTerm) ? '' : 'none';
-                        });
-                    });
-                    document.getElementById('load-more-btn')?.addEventListener('click', () => fetchAndDisplayReceipts(true));
-                });
-            }
-
-            const listBody = document.getElementById('receipts-list-body');
-            const loader = document.getElementById('list-loader');
-            const loadMoreBtn = document.getElementById('load-more-btn');
-
-            if (!listBody || !loader || !loadMoreBtn) return;
-            
-            if (!loadMore) {
-              listBody.innerHTML = ''; 
-            }
-            loader.style.display = 'block';
-            loadMoreBtn.disabled = true;
-
-            try {
-                const receiptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'receipts');
-                const constraints = [orderBy("receiptNumber", "desc"), limit(15)];
-                if (lastVisibleReceipt) {
-                    constraints.push(startAfter(lastVisibleReceipt));
-                }
-                const q = query(receiptsRef, ...constraints);
-                
-                const documentSnapshots = await getDocs(q);
-                
-                if (documentSnapshots.empty && !loadMore) {
-                    const row = document.createElement('tr');
-                    const cell = document.createElement('td');
-                    cell.colSpan = 5;
-                    cell.className = 'text-center p-4';
-                    cell.textContent = 'No se encontraron recibos.';
-                    row.appendChild(cell);
-                    listBody.appendChild(row);
-                }
-                
-                documentSnapshots.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b';
-                    row.dataset.searchText = `${data.recipient} ${data.concept} ${data.receiptNumber}`.toLowerCase();
-
-                    const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy);
-                    
-                    const createCell = (text, className = '') => {
-                        const cell = document.createElement('td');
-                        cell.className = `px-6 py-4 ${className}`;
-                        cell.textContent = text;
-                        return cell;
-                    };
-
-                    row.appendChild(createCell(String(data.receiptNumber).padStart(5, '0'), 'font-medium text-gray-900'));
-                    row.appendChild(createCell(data.date));
-                    row.appendChild(createCell(data.recipient));
-                    row.appendChild(createCell(new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.amount)));
-
-                    const actionsCell = document.createElement('td');
-                    actionsCell.className = 'px-6 py-4 text-center';
-                    
-                    const viewBtn = document.createElement('button');
-                    viewBtn.textContent = 'Ver';
-                    viewBtn.className = 'load-btn font-medium text-blue-600 hover:underline';
-                    viewBtn.dataset.id = data.receiptNumber;
-                    actionsCell.appendChild(viewBtn);
-
-                    if (canEdit) {
-                        const editBtn = document.createElement('button');
-                        editBtn.textContent = 'Editar';
-                        editBtn.className = 'edit-btn ml-2 text-yellow-500 hover:text-yellow-700 font-medium';
-                        editBtn.dataset.id = data.receiptNumber;
-                        actionsCell.appendChild(editBtn);
-                    }
-                    if (state.userRole === ROLES.ADMIN) {
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.textContent = 'Eliminar';
-                        deleteBtn.className = 'delete-btn ml-2 text-red-500 hover:text-red-700 font-medium';
-                        deleteBtn.dataset.id = data.receiptNumber;
-                        actionsCell.appendChild(deleteBtn);
-                    }
-                    row.appendChild(actionsCell);
-                    listBody.appendChild(row);
-                });
-
-                lastVisibleReceipt = documentSnapshots.docs[documentSnapshots.docs.length-1];
-                loadMoreBtn.style.display = documentSnapshots.docs.length < 15 ? 'none' : 'inline-flex';
-                
-            } catch (error) {
-                console.error("Error fetching receipts:", error);
-                listBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error al cargar.</td></tr>';
-            } finally {
-                loader.style.display = 'none';
-                loadMoreBtn.disabled = false;
-            }
-        }
-        
-        async function deleteReceipt(id) {
-            if (state.userRole !== ROLES.ADMIN) {
-                return showModal('No tiene permisos para realizar esta acción.');
-            }
-            if(await showModal(`¿Eliminar el recibo #${String(id).padStart(5, '0')}? Esta acción no se puede deshacer.`, { isConfirm: true, confirmText: 'Sí, eliminar' })) {
-                try { 
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id)));
-                    await showModal('Recibo eliminado.'); 
-                    fetchAndDisplayReceipts(false);
-                } catch (error) { console.error("Error deleting receipt:", error); await showModal(`No se pudo eliminar: ${error.message}`);}
-            }
-        }
-        
-        async function loadReceiptForEditing(id) {
-            setAppView('template-createReceipt', async () => {
-                 try {
-                    const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id)));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-
-                        const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy);
-                        if (!canEdit) {
-                            return showModal('No tiene permisos para editar este recibo.').then(() => fetchAndDisplayReceipts());
-                        }
-
-                        showStatusMessage(`Editando recibo #${String(id).padStart(5, '0')}...`);
-                        
-                        document.getElementById('receipt-number').textContent = String(data.receiptNumber).padStart(5, '0');
-                        const amountNumEl = document.getElementById('amount-number');
-                        if (amountNumEl) amountNumEl.value = data.amount;
-                        const amountTextEl = document.getElementById('amount-text');
-                        if (amountTextEl) amountTextEl.value = data.amountInWords;
-                        
-                        document.getElementById('recipient').value = data.recipient;
-                        document.getElementById('concept').value = data.concept;
-                        document.getElementById('date').value = data.date;
-                        const paymentMethodEl = document.getElementById('payment-method');
-                        paymentMethodEl.value = data.paymentMethod;
-                        
-                        const folioContainer = document.getElementById('folio-container');
-                        const showFolioOnLoad = paymentMethodEl.value === 'Transferencia' || paymentMethodEl.value === 'TPV (Terminal)';
-                        folioContainer?.classList.toggle('hidden', !showFolioOnLoad);
-                        if (showFolioOnLoad) {
-                            document.getElementById('folio').value = data.folio;
-                        }
-
-                        const debouncedConvert = debounce((value) => {
-                            if(amountTextEl) amountTextEl.value = numeroALetras(value || 0).toUpperCase();
-                        }, 300);
-
-                        amountNumEl?.addEventListener('input', (e) => {
-                            let value = e.target.value.replace(/[^\d.]/g, '');
-                            const parts = value.split('.');
-                            if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
-                            e.target.value = value;
-                            debouncedConvert(parseFloat(value));
-                        });
-
-                        paymentMethodEl?.addEventListener('change', (e) => {
-                            const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)';
-                            folioContainer?.classList.toggle('hidden', !showFolio);
-                        });
-
-                        const saveBtn = document.getElementById('save-print-btn');
-                        saveBtn.textContent = "Guardar Cambios";
-                        saveBtn.className = 'no-print mt-6 w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-yellow-600 flex items-center justify-center';
-                        saveBtn.onclick = () => updateReceipt(data.receiptNumber);
-                    } else { 
-                        showStatusMessage("No se encontró el recibo.");
-                        setTimeout(fetchAndDisplayReceipts, 1500);
-                    }
-                } catch(e) { console.error("Error loading receipt for edit:", e); showStatusMessage("Error al cargar el recibo."); }
-            });
-        }
-        
-        async function updateReceipt(id) {
-            if (state.isSaving) return;
-            const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method');
-            const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0;
-            if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); }
-            state.isSaving = true;
-            const saveBtn = document.getElementById('save-print-btn');
-            if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Actualizando...'; saveBtn.disabled = true; }
-            try {
-                const receiptRef = doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id));
-                const updatedData = {
-                    amount,
-                    amountInWords: document.getElementById('amount-text')?.value,
-                    recipient: recipientEl.value,
-                    concept: conceptEl.value,
-                    date: document.getElementById('date')?.value,
-                    paymentMethod: paymentMethodEl.value,
-                    folio: document.getElementById('folio')?.value || '',
-                };
-                await updateDoc(receiptRef, updatedData);
-                showStatusMessage(`Recibo #${String(id).padStart(5, '0')} actualizado.`, 4000, true);
-                playSuccessSound();
-                fetchAndDisplayReceipts(false);
-            } catch(error) {
-                console.error("Error updating receipt:", error); await showModal(`Error al actualizar el recibo: ${error.message}`);
-            } finally {
-                state.isSaving = false;
-            }
-        }
-
-        async function loadReceiptForViewing(id) {
-            setAppView('template-createReceipt', async () => {
-                showStatusMessage(`Cargando recibo #${String(id).padStart(5, '0')}...`);
-                try {
-                    const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id)));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById('receipt-number').textContent = String(data.receiptNumber).padStart(5, '0');
-                        document.getElementById('amount-number').value = new Intl.NumberFormat('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(data.amount);
-                        document.getElementById('amount-text').value = data.amountInWords;
-                        document.getElementById('recipient').value = data.recipient;
-                        document.getElementById('concept').value = data.concept;
-                        document.getElementById('date').value = data.date;
-                        document.getElementById('payment-method').value = data.paymentMethod;
-                        if(data.paymentMethod === 'Transferencia' || data.paymentMethod === 'TPV (Terminal)') {
-                            document.getElementById('folio-container').classList.remove('hidden');
-                            document.getElementById('folio').value = data.folio;
-                        }
-                        appContentWrapper.querySelectorAll('input, select').forEach(i => i.disabled = true);
-                        const saveBtn = document.getElementById('save-print-btn');
-                        saveBtn.textContent = "Descargar PDF";
-                        saveBtn.onclick = () => generatePDF(data);
-                        showStatusMessage(`Viendo recibo #${String(id).padStart(5, '0')}.`);
-                    } else { showStatusMessage("No se encontró el recibo."); }
-                } catch(e) { console.error("Error loading receipt:", e); showStatusMessage("Error al cargar el recibo."); }
-            });
-        }
-
-        async function loadUsers() {
-            setAppView('template-admin', async () => {
-                const loader = document.getElementById('user-list-loader'), list = document.getElementById('user-list');
-                if(!loader || !list) return;
-                loader.style.display = 'block'; 
-                list.replaceChildren();
-                try {
-                    const snapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
-                    snapshot.forEach(docSnap => {
-                        const userData = docSnap.data();
-                        const li = document.createElement('li');
-                        li.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
-                        
-                        const infoDiv = document.createElement('div');
-                        const identifierP = document.createElement('p');
-                        identifierP.className = 'font-medium';
-                        identifierP.textContent = userData.identifier;
-                        const roleP = document.createElement('p');
-                        roleP.className = 'text-xs text-gray-500';
-                        roleP.textContent = userData.role;
-                        infoDiv.append(identifierP, roleP);
-                        li.appendChild(infoDiv);
-                        
-                        if (userData.role !== ROLES.ADMIN && state.currentUser.uid !== docSnap.id) {
-                            const revokeBtn = document.createElement('button');
-                            revokeBtn.dataset.uid = docSnap.id;
-                            revokeBtn.className = 'revoke-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600';
-                            revokeBtn.textContent = 'Revocar';
-                            li.appendChild(revokeBtn);
-                        }
-                        list.appendChild(li);
-                    });
-                } catch (e) { 
-                    console.error("Error loading users:", e); 
-                    const errorLi = document.createElement('li');
-                    errorLi.className = 'text-red-500';
-                    errorLi.textContent = 'Error al cargar usuarios.';
-                    list.appendChild(errorLi);
-                } finally { loader.style.display = 'none'; }
-            });
-        }
-
-        async function revokeAccess(uid) {
-             if (state.userRole !== ROLES.ADMIN) {
-                return showModal('No tiene permisos para realizar esta acción.');
-            }
-            if(await showModal('¿Está seguro de que desea revocar el acceso a este usuario?', { isConfirm: true, confirmText: 'Sí, revocar' })) {
-                try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid)); await showModal('Acceso revocado.'); await loadUsers();
-                } catch (e) { console.error("Error revoking access:", e); await showModal(`Error al revocar acceso: ${e.message}`); }
-            }
-        }
+        // --- CORE APPLICATION LOGIC (FIREBASE, ROLES, RECEIPTS - Sin cambios) ---
+        async function checkAndSetupUserRole(user) { const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid); try { const userDoc = await getDoc(userDocRef); if (userDoc.exists()) { state.userRole = userDoc.data().role; } else { const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users'); const querySnapshot = await getDocs(query(usersRef, limit(1))); const role = querySnapshot.empty ? ROLES.ADMIN : ROLES.COLLABORATOR; await setDoc(userDocRef, { identifier: user.email, role: role, createdAt: new Date().toISOString() }); state.userRole = role; } } catch (e) { console.error("Error setting up user role:", e); state.userRole = ROLES.COLLABORATOR; } }
+        function prepareNewReceipt() { setAppView('template-createReceipt', () => { const dateEl = document.getElementById('date'); if (dateEl) { dateEl.value = new Date().toLocaleDateString('en-CA'); } const amountInput = document.getElementById('amount-number'); const amountText = document.getElementById('amount-text'); const debouncedConvert = debounce((value) => { if(amountText) amountText.value = numeroALetras(value || 0).toUpperCase(); }, 300); amountInput?.addEventListener('input', (e) => { const el = e.target; let value = el.value.replace(/[^\d.]/g, ''); const parts = value.split('.'); if (parts.length > 2) { value = parts[0] + '.' + parts.slice(1).join(''); } el.value = value; debouncedConvert(parseFloat(value)); }); document.getElementById('payment-method')?.addEventListener('change', (e) => { const folioContainer = document.getElementById('folio-container'); const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolio); }); document.getElementById('save-print-btn')?.addEventListener('click', saveAndPrint); }); showStatusMessage('Listo para crear un nuevo recibo.'); }
+        async function getNextReceiptNumber() { const counterRef = doc(db, 'artifacts', appId, 'public', 'data', 'counters', 'receipts'); try { return await runTransaction(db, async (transaction) => { const counterDoc = await transaction.get(counterRef); const nextId = (counterDoc.data()?.lastNumber || 0) + 1; transaction.set(counterRef, { lastNumber: nextId }, { merge: true }); return nextId; }); } catch (e) { console.error("Transaction failed:", e); throw e; } }
+        async function saveAndPrint() { if (state.isSaving) return; const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method'); const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0; if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); } state.isSaving = true; const saveBtn = document.getElementById('save-print-btn'); if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Guardando...'; saveBtn.disabled = true; } try { const newReceiptNumber = await getNextReceiptNumber(); const receiptData = { receiptNumber: newReceiptNumber, amount, amountInWords: document.getElementById('amount-text')?.value, recipient: recipientEl.value, concept: conceptEl.value, date: document.getElementById('date')?.value, paymentMethod: paymentMethodEl.value, folio: document.getElementById('folio')?.value || '', createdAt: new Date().toISOString(), createdBy: state.currentUser.uid }; await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(receiptData.receiptNumber)), receiptData); prepareNewReceipt(); setTimeout(() => { showStatusMessage(`Recibo #${String(newReceiptNumber).padStart(5, '0')} guardado con éxito.`, 4000, true); playSuccessSound(); generatePDF(receiptData); }, 100); } catch (error) { console.error("Error saving receipt:", error); await showModal(`Error al guardar el recibo: ${error.message}`); } finally { state.isSaving = false; if(saveBtn) { saveBtn.innerHTML = 'Guardar y Descargar PDF'; saveBtn.disabled = false; } } }
+        async function fetchAndDisplayReceipts(loadMore = false) { if (!loadMore) { lastVisibleReceipt = null; setAppView('template-listReceipts', () => { document.getElementById('search-receipts-input')?.addEventListener('input', (e) => { const searchTerm = e.target.value.toLowerCase().trim(); document.querySelectorAll('#receipts-list-body tr').forEach(row => { const rowText = row.dataset.searchText || ''; row.style.display = rowText.includes(searchTerm) ? '' : 'none'; }); }); document.getElementById('load-more-btn')?.addEventListener('click', () => fetchAndDisplayReceipts(true)); }); } const listBody = document.getElementById('receipts-list-body'); const loader = document.getElementById('list-loader'); const loadMoreBtn = document.getElementById('load-more-btn'); if (!listBody || !loader || !loadMoreBtn) return; if (!loadMore) { listBody.innerHTML = ''; } loader.style.display = 'block'; loadMoreBtn.disabled = true; try { const receiptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'receipts'); const constraints = [orderBy("receiptNumber", "desc"), limit(15)]; if (lastVisibleReceipt) { constraints.push(startAfter(lastVisibleReceipt)); } const q = query(receiptsRef, ...constraints); const documentSnapshots = await getDocs(q); if (documentSnapshots.empty && !loadMore) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 5; cell.className = 'text-center p-4'; cell.textContent = 'No se encontraron recibos.'; row.appendChild(cell); listBody.appendChild(row); } documentSnapshots.forEach(docSnap => { const data = docSnap.data(); const row = document.createElement('tr'); row.className = 'bg-white border-b'; row.dataset.searchText = `${data.recipient} ${data.concept} ${data.receiptNumber}`.toLowerCase(); const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy); const createCell = (text, className = '') => { const cell = document.createElement('td'); cell.className = `px-6 py-4 ${className}`; cell.textContent = text; return cell; }; row.appendChild(createCell(String(data.receiptNumber).padStart(5, '0'), 'font-medium text-gray-900')); row.appendChild(createCell(data.date)); row.appendChild(createCell(data.recipient)); row.appendChild(createCell(new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.amount))); const actionsCell = document.createElement('td'); actionsCell.className = 'px-6 py-4 text-center'; const viewBtn = document.createElement('button'); viewBtn.textContent = 'Ver'; viewBtn.className = 'load-btn font-medium text-blue-600 hover:underline'; viewBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(viewBtn); if (canEdit) { const editBtn = document.createElement('button'); editBtn.textContent = 'Editar'; editBtn.className = 'edit-btn ml-2 text-yellow-500 hover:text-yellow-700 font-medium'; editBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(editBtn); } if (state.userRole === ROLES.ADMIN) { const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'Eliminar'; deleteBtn.className = 'delete-btn ml-2 text-red-500 hover:text-red-700 font-medium'; deleteBtn.dataset.id = data.receiptNumber; actionsCell.appendChild(deleteBtn); } row.appendChild(actionsCell); listBody.appendChild(row); }); lastVisibleReceipt = documentSnapshots.docs[documentSnapshots.docs.length-1]; loadMoreBtn.style.display = documentSnapshots.docs.length < 15 ? 'none' : 'inline-flex'; } catch (error) { console.error("Error fetching receipts:", error); listBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-red-500">Error al cargar.</td></tr>'; } finally { loader.style.display = 'none'; loadMoreBtn.disabled = false; } }
+        async function deleteReceipt(id) { if (state.userRole !== ROLES.ADMIN) { return showModal('No tiene permisos para realizar esta acción.'); } if(await showModal(`¿Eliminar el recibo #${String(id).padStart(5, '0')}? Esta acción no se puede deshacer.`, { isConfirm: true, confirmText: 'Sí, eliminar' })) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id))); await showModal('Recibo eliminado.'); fetchAndDisplayReceipts(false); } catch (error) { console.error("Error deleting receipt:", error); await showModal(`No se pudo eliminar: ${error.message}`);} } }
+        async function loadReceiptForEditing(id) { setAppView('template-createReceipt', async () => { try { const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id))); if (docSnap.exists()) { const data = docSnap.data(); const canEdit = state.userRole === ROLES.ADMIN || (data.createdBy && state.currentUser.uid === data.createdBy); if (!canEdit) { return showModal('No tiene permisos para editar este recibo.').then(() => fetchAndDisplayReceipts()); } showStatusMessage(`Editando recibo #${String(id).padStart(5, '0')}...`); document.getElementById('receipt-number').textContent = String(data.receiptNumber).padStart(5, '0'); const amountNumEl = document.getElementById('amount-number'); if (amountNumEl) amountNumEl.value = data.amount; const amountTextEl = document.getElementById('amount-text'); if (amountTextEl) amountTextEl.value = data.amountInWords; document.getElementById('recipient').value = data.recipient; document.getElementById('concept').value = data.concept; document.getElementById('date').value = data.date; const paymentMethodEl = document.getElementById('payment-method'); paymentMethodEl.value = data.paymentMethod; const folioContainer = document.getElementById('folio-container'); const showFolioOnLoad = paymentMethodEl.value === 'Transferencia' || paymentMethodEl.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolioOnLoad); if (showFolioOnLoad) { document.getElementById('folio').value = data.folio; } const debouncedConvert = debounce((value) => { if(amountTextEl) amountTextEl.value = numeroALetras(value || 0).toUpperCase(); }, 300); amountNumEl?.addEventListener('input', (e) => { let value = e.target.value.replace(/[^\d.]/g, ''); const parts = value.split('.'); if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join(''); e.target.value = value; debouncedConvert(parseFloat(value)); }); paymentMethodEl?.addEventListener('change', (e) => { const showFolio = e.target.value === 'Transferencia' || e.target.value === 'TPV (Terminal)'; folioContainer?.classList.toggle('hidden', !showFolio); }); const saveBtn = document.getElementById('save-print-btn'); saveBtn.textContent = "Guardar Cambios"; saveBtn.className = 'no-print mt-6 w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-yellow-600 flex items-center justify-center'; saveBtn.onclick = () => updateReceipt(data.receiptNumber); } else { showStatusMessage("No se encontró el recibo."); setTimeout(fetchAndDisplayReceipts, 1500); } } catch(e) { console.error("Error loading receipt for edit:", e); showStatusMessage("Error al cargar el recibo."); } }); }
+        async function updateReceipt(id) { if (state.isSaving) return; const recipientEl = document.getElementById('recipient'), conceptEl = document.getElementById('concept'), amountNumEl = document.getElementById('amount-number'), paymentMethodEl = document.getElementById('payment-method'); const amount = parseFloat(amountNumEl?.value.replace(/[^0-9.]/g, '')) || 0; if (!amount || !recipientEl?.value.trim() || !conceptEl?.value.trim() || !paymentMethodEl?.value) { return showModal('Por favor, complete todos los campos requeridos.', { confirmText: 'Entendido' }); } state.isSaving = true; const saveBtn = document.getElementById('save-print-btn'); if(saveBtn) { saveBtn.innerHTML = '<div class="loader inline-block mr-2"></div> Actualizando...'; saveBtn.disabled = true; } try { const receiptRef = doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id)); const updatedData = { amount, amountInWords: document.getElementById('amount-text')?.value, recipient: recipientEl.value, concept: conceptEl.value, date: document.getElementById('date')?.value, paymentMethod: paymentMethodEl.value, folio: document.getElementById('folio')?.value || '', }; await updateDoc(receiptRef, updatedData); showStatusMessage(`Recibo #${String(id).padStart(5, '0')} actualizado.`, 4000, true); playSuccessSound(); fetchAndDisplayReceipts(false); } catch(error) { console.error("Error updating receipt:", error); await showModal(`Error al actualizar el recibo: ${error.message}`); } finally { state.isSaving = false; } }
+        async function loadReceiptForViewing(id) { setAppView('template-createReceipt', async () => { showStatusMessage(`Cargando recibo #${String(id).padStart(5, '0')}...`); try { const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'receipts', String(id))); if (docSnap.exists()) { const data = docSnap.data(); document.getElementById('receipt-number').textContent = String(data.receiptNumber).padStart(5, '0'); document.getElementById('amount-number').value = new Intl.NumberFormat('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(data.amount); document.getElementById('amount-text').value = data.amountInWords; document.getElementById('recipient').value = data.recipient; document.getElementById('concept').value = data.concept; document.getElementById('date').value = data.date; document.getElementById('payment-method').value = data.paymentMethod; if(data.paymentMethod === 'Transferencia' || data.paymentMethod === 'TPV (Terminal)') { document.getElementById('folio-container').classList.remove('hidden'); document.getElementById('folio').value = data.folio; } appContentWrapper.querySelectorAll('input, select').forEach(i => i.disabled = true); const saveBtn = document.getElementById('save-print-btn'); saveBtn.textContent = "Descargar PDF"; saveBtn.onclick = () => generatePDF(data); showStatusMessage(`Viendo recibo #${String(id).padStart(5, '0')}.`); } else { showStatusMessage("No se encontró el recibo."); } } catch(e) { console.error("Error loading receipt:", e); showStatusMessage("Error al cargar el recibo."); } }); }
+        async function loadUsers() { setAppView('template-admin', async () => { const loader = document.getElementById('user-list-loader'), list = document.getElementById('user-list'); if(!loader || !list) return; loader.style.display = 'block'; list.replaceChildren(); try { const snapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users')); snapshot.forEach(docSnap => { const userData = docSnap.data(); const li = document.createElement('li'); li.className = 'flex justify-between items-center bg-gray-50 p-2 rounded'; const infoDiv = document.createElement('div'); const identifierP = document.createElement('p'); identifierP.className = 'font-medium'; identifierP.textContent = userData.identifier; const roleP = document.createElement('p'); roleP.className = 'text-xs text-gray-500'; roleP.textContent = userData.role; infoDiv.append(identifierP, roleP); li.appendChild(infoDiv); if (userData.role !== ROLES.ADMIN && state.currentUser.uid !== docSnap.id) { const revokeBtn = document.createElement('button'); revokeBtn.dataset.uid = docSnap.id; revokeBtn.className = 'revoke-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600'; revokeBtn.textContent = 'Revocar'; li.appendChild(revokeBtn); } list.appendChild(li); }); } catch (e) { console.error("Error loading users:", e); const errorLi = document.createElement('li'); errorLi.className = 'text-red-500'; errorLi.textContent = 'Error al cargar usuarios.'; list.appendChild(errorLi); } finally { loader.style.display = 'none'; } }); }
+        async function revokeAccess(uid) { if (state.userRole !== ROLES.ADMIN) { return showModal('No tiene permisos para realizar esta acción.'); } if(await showModal('¿Está seguro de que desea revocar el acceso a este usuario?', { isConfirm: true, confirmText: 'Sí, revocar' })) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid)); await showModal('Acceso revocado.'); await loadUsers(); } catch (e) { console.error("Error revoking access:", e); await showModal(`Error al revocar acceso: ${e.message}`); } } }
         
         // --- AUTH & INITIALIZATION ---
+        
+        // Función para manejar el inicio de sesión y registro
+        async function handleAuth(isRegister) {
+            const emailEl = document.getElementById('login-email');
+            const passwordEl = document.getElementById('login-password');
+            const email = emailEl.value;
+            const password = passwordEl.value;
+            if (!email || !password) {
+                return showModal('Por favor, ingrese correo y contraseña.');
+            }
+            const authBtn = isRegister ? document.getElementById('register-btn') : document.getElementById('login-btn');
+            const originalText = authBtn.innerHTML;
+            authBtn.innerHTML = '<div class="loader inline-block"></div>';
+            authBtn.disabled = true;
+
+            try {
+                if (isRegister) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    // El onAuthStateChanged se encargará del resto
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // El onAuthStateChanged se encargará del resto
+                }
+            } catch (error) {
+                console.error("Auth Error:", error.code, error.message);
+                let message = 'Ocurrió un error. Intente de nuevo.';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        message = 'Correo o contraseña incorrectos.';
+                        break;
+                    case 'auth/email-already-in-use':
+                        message = 'Este correo electrónico ya está registrado. Intente iniciar sesión.';
+                        break;
+                    case 'auth/weak-password':
+                        message = 'La contraseña debe tener al menos 6 caracteres.';
+                        break;
+                }
+                showModal(message);
+            } finally {
+                authBtn.innerHTML = originalText;
+                authBtn.disabled = false;
+            }
+        }
+
         async function handleAuthStateChange(user) {
             if (user) {
                 if(state.currentUser?.uid === user.uid) return; 
@@ -846,7 +319,7 @@
                 document.body.className = 'bg-gray-100 is-authenticated';
 
                 const userDisplay = document.getElementById('user-email-display');
-                if(userDisplay) userDisplay.textContent = user.isAnonymous ? `Usuario: ${user.uid.substring(0, 8)}...` : user.email;
+                if(userDisplay) userDisplay.textContent = user.email; // Mostrar correo en lugar de UID
                 const adminBtn = document.getElementById('admin-panel-btn');
                 if(adminBtn) adminBtn.classList.toggle('hidden', state.userRole !== ROLES.ADMIN);
                 prepareNewReceipt();
@@ -854,26 +327,21 @@
                 state.currentUser = null;
                 state.userRole = null;
                 document.body.className = 'bg-gray-100 is-logged-out';
-                const h2 = document.getElementById('login-message');
-                if(h2) h2.textContent = 'Sesión Cerrada';
-                document.getElementById('login-loader').style.display = 'none';
-                document.getElementById('relogin-btn').classList.remove('hidden');
             }
         }
 
         function addEventListeners() {
             document.body.addEventListener('click', initializeAudio, { once: true });
+            document.getElementById('login-form')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAuth(false); // False = Iniciar sesión
+            });
+            document.getElementById('register-btn')?.addEventListener('click', () => handleAuth(true)); // True = Registrar
 
             document.getElementById('logout-btn')?.addEventListener('click', async () => {
                 if(await showModal('¿Está seguro de que desea cerrar sesión?', { isConfirm: true, confirmText: 'Sí, cerrar', cancelText: 'No' })) { 
                     await signOut(auth);
                 }
-            });
-            document.getElementById('relogin-btn')?.addEventListener('click', () => {
-                document.getElementById('login-message').textContent = 'Iniciando sesión...';
-                document.getElementById('login-loader').style.display = 'block';
-                document.getElementById('relogin-btn').classList.add('hidden');
-                signInAnonymously(auth).catch(e => console.error('Re-login failed:', e));
             });
 
             const setupButtonWithLoader = (id, action) => {
@@ -903,9 +371,7 @@
         
         document.addEventListener('DOMContentLoaded', async () => {
             appContentWrapper = document.getElementById('app-content-wrapper');
-            document.body.className = 'bg-gray-100 is-loading';
             
-            // This check verifies that the firebaseConfig object was successfully injected by Netlify.
             if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey || firebaseConfig.apiKey === "AIza-REPLACE-ME") {
                 document.body.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p class="font-bold">Error de Configuración</p><p>La configuración de Firebase no se cargó correctamente. Por favor, verifique la variable de entorno 'firebase_config' y la configuración de 'Snippet Injection' en Netlify.</p></div>`;
                 return;
@@ -916,22 +382,13 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
                 await enableIndexedDbPersistence(db).catch((err) => {
-                    if (err.code == 'failed-precondition') {
-                        console.warn("Firestore persistence failed: Multiple tabs open.");
-                    } else if (err.code == 'unimplemented') {
-                        console.warn("Firestore persistence failed: Browser does not support it.");
-                    }
+                    if (err.code == 'failed-precondition') { console.warn("Firestore persistence failed: Multiple tabs open."); } 
+                    else if (err.code == 'unimplemented') { console.warn("Firestore persistence failed: Browser does not support it."); }
                 });
 
                 onAuthStateChanged(auth, handleAuthStateChange);
                 addEventListeners();
-
-                if(!auth.currentUser) {
-                    await signInAnonymously(auth).catch(e => {
-                        console.error('Anonymous sign-in failed. This is likely due to an invalid Firebase config.', e);
-                        showModal(`Error de autenticación: ${e.message}. Verifique la configuración de Firebase.`);
-                    });
-                }
+                
             } catch(e) {
                 console.error("Initialization failed: ", e);
                 document.body.innerHTML = "Error fatal al inicializar la aplicación. Revise la consola.";
