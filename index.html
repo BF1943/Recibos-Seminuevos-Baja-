@@ -56,9 +56,13 @@
                         <label for="login-email" class="sr-only">Correo electrónico</label>
                         <input id="login-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="Correo electrónico">
                     </div>
-                    <div id="password-container">
+                    <div id="password-wrapper" class="relative">
                         <label for="login-password" class="sr-only">Contraseña</label>
                         <input id="login-password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm" placeholder="Contraseña">
+                        <button type="button" id="password-toggle-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <svg id="eye-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.03 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                            <svg id="eye-slash-icon" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.367zm-4.24-1.213a4 4 0 115.656-5.656l-5.656 5.656z" clip-rule="evenodd" /><path d="M.458 10C1.732 5.943 5.522 3 10 3a9.953 9.953 0 014.28.89l-1.572 1.572A8.01 8.01 0 0010 5.5c-2.98 0-5.555 1.7-6.93 4.126A.5.5 0 003.5 10c.045.14.092.278.143.414L.458 10z" /><path d="M15.39 15.39l-1.572-1.572A8.01 8.01 0 0010 14.5c2.98 0 5.555-1.7 6.93-4.126a.5.5 0 00-.434-.874c-.045-.14-.092-.278-.143-.414L15.39 15.39z" /></svg>
+                        </button>
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-sm">
@@ -118,9 +122,8 @@
     <template id="template-admin"> <div class="w-full max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg"> <h2 class="text-2xl font-bold text-gray-800 mb-6">Administrar Usuarios</h2> <div class="space-y-4"> <h3 class="text-lg font-semibold mb-2">Usuarios Activos</h3> <div id="user-list-loader" class="text-center py-4"><div class="loader inline-block"></div></div> <ul id="user-list" class="space-y-2"></ul> </div> </div> </template>
 
     <script type="module">
-        // Importar las funciones necesarias, incluyendo las de email/password, 'where' y la de reseteo de contraseña
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, collection, getDocs, deleteDoc, enableIndexedDbPersistence, query, where, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Basic App Setup ---
@@ -164,7 +167,7 @@
             const title = document.getElementById('login-title');
             const submitBtn = document.getElementById('submit-auth-btn');
             const toggleBtn = document.getElementById('toggle-auth-mode-btn');
-            const passwordContainer = document.getElementById('password-container');
+            const passwordContainer = document.getElementById('password-wrapper');
             const forgotPasswordBtn = document.getElementById('forgot-password-btn');
 
             if (mode === 'register') {
@@ -188,10 +191,7 @@
             const passwordEl = document.getElementById('login-password');
             const email = emailEl.value;
             const password = passwordEl.value;
-            if (!email || !password) {
-                return showModal('Por favor, ingrese correo y contraseña.');
-            }
-            
+
             const authBtn = document.getElementById('submit-auth-btn');
             const originalText = authBtn.innerHTML;
             authBtn.innerHTML = '<div class="loader inline-block"></div>';
@@ -199,8 +199,15 @@
 
             try {
                 if (mode === 'register') {
+                    // Primero, verifica si el correo ya existe
+                    const methods = await fetchSignInMethodsForEmail(auth, email);
+                    if (methods.length > 0) {
+                        throw { code: 'auth/email-already-in-use' };
+                    }
+                    if (!password) { return showModal('Por favor, ingrese una contraseña.'); }
                     await createUserWithEmailAndPassword(auth, email, password);
                 } else {
+                    if (!password) { return showModal('Por favor, ingrese su contraseña.'); }
                     await signInWithEmailAndPassword(auth, email, password);
                 }
             } catch (error) {
@@ -276,6 +283,21 @@
             });
             
             document.getElementById('forgot-password-btn')?.addEventListener('click', handlePasswordReset);
+            
+            document.getElementById('password-toggle-btn')?.addEventListener('click', () => {
+                const passwordInput = document.getElementById('login-password');
+                const eyeIcon = document.getElementById('eye-icon');
+                const eyeSlashIcon = document.getElementById('eye-slash-icon');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.classList.add('hidden');
+                    eyeSlashIcon.classList.remove('hidden');
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.classList.remove('hidden');
+                    eyeSlashIcon.classList.add('hidden');
+                }
+            });
 
             document.getElementById('logout-btn')?.addEventListener('click', async () => {
                 if(await showModal('¿Está seguro de que desea cerrar sesión?', { isConfirm: true, confirmText: 'Sí, cerrar', cancelText: 'No' })) { 
@@ -335,4 +357,4 @@
         });
     </script>
 </body>
-</ht
+</html>
